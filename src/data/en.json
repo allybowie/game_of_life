@@ -9,6 +9,13 @@
             ]
         },
         {
+            "header": "What's The Point?",
+            "content": [
+                "There is none.",
+                "This is just an exercise for me in problem solving and the fact that I've hosted it only stems from a narcissistic need to pat myself on the back; to you this is useless."
+            ]
+        },
+        {
             "header": "The Rules",
             "listItems": [
                 "Any live cell with fewer than two live neighbours dies, as if by underpopulation.",
