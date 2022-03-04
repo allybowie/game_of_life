@@ -6,7 +6,7 @@
       </div>
       <h1>The Game of Life</h1>
     </div>
-    <grid />
+    <grid :forceStop="infoPopupOpen"/>
     <div v-if="infoPopupOpen" :class="'infoPopupContainer'">
       <div :class="'popupInnerContainer'">
         <div :class="'closeButton'" @click="toggleInfoPopup()"></div>

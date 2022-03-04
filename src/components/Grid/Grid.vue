@@ -54,6 +54,12 @@ export default {
         gridSizeRules: yup.number().required().min(8).max(75)
     }
   },
+  props: {
+      forceStop: {
+          type: Boolean,
+          default: false
+      }
+  },
   components: {
       Field,
       Form
@@ -80,7 +86,7 @@ export default {
             this.defaultGrid = newGridLayout;
         },
         updateEntireGrid() {
-            if(!this.playing)
+            if(!this.playing || this.forceStop)
                 return;
 
             const newGridObject = updateGrid([...this.defaultGrid]);
