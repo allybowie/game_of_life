@@ -29,11 +29,24 @@
             </div>
         </Field>
     </Form>
-    <div :class="'button'" @click="startAnimation()">
-        <p>{{ playing ? "Stop" : "Start" }}</p>
+    <div :class="'buttonContainer'">
+    <div :class="'button'">
+        <p @click="startAnimation()">{{ playing ? "Stop" : "Start" }}</p>
     </div>
-    <div :class="'button'" @click="randomize()">
-        <p>Random Grid</p>
+    <div :class="'button'">
+        <p @click="randomize()">Random Grid</p>
+    </div>
+    <div :class="'optionsDescriptionContainer'">
+        <p>The below options update the grid so that every cell has the same value.</p>
+        <p>This allows you to manually and tediously create your own grid layout.</p>
+        <p>There is no point in doing this, but having the options makes the app look like it has more features.</p>
+    </div>
+    <div :class="'button'">
+        <p @click="randomize('alive')">Resurrect All</p>
+    </div>
+    <div :class="'button'">
+        <p @click="randomize('dead')">Kill Them All</p>
+    </div>
     </div>
   </div>
 </template>
@@ -75,11 +88,11 @@ export default {
             if(error.includes("less than")) return "The Grid Size must be less than or equal to 75."
             return error.includes('value `""`') ? "The 'Grid Size' field is required" : "The 'Grid Size' field must be a number.";
         },
-        randomize() {
+        randomize(forceStatus = "") {
             this.playing = false;
             const newGridLayout = [...this.defaultGrid].map(row => {
                 return row.map(() => {
-                    return Math.random() <= 0.5 ? "alive" : "dead";
+                    return forceStatus ? forceStatus : (Math.random() <= 0.5 ? "alive" : "dead");
                 })
             })
 
@@ -173,6 +186,19 @@ export default {
     max-height: 320px;
 }
 
+.buttonContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.optionsDescriptionContainer {
+    p {
+        font-size: 13px;
+        margin-bottom: 5px;
+        margin-top: 0px;
+    }
+}
+
 .field {
     display: flex;
     flex-direction: column;
@@ -203,7 +229,16 @@ export default {
 }
 
 .button {
-    cursor: pointer;
+    display: inline-block;
+
+    p {
+        cursor: pointer;
+        display: inline-block;
+        border: 2px solid #2c3e50;
+        padding: 10px;
+        border-radius: 4px;
+        width: 100px;
+    }
 
     &:last-child {
         padding-bottom: 30px;
