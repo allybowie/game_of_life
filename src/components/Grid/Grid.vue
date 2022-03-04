@@ -51,7 +51,7 @@ export default {
         defaultGrid: [],
         playing: false,
         gridSplit: 50,
-        gridSizeRules: yup.number().required().min(8)
+        gridSizeRules: yup.number().required().min(8).max(75)
     }
   },
   components: {
@@ -65,7 +65,8 @@ export default {
   },
   methods: {
         generateError(error) {
-            if(error.includes("greater than")) return "The Grid Size must be greater than or equal to 8."
+            if(error.includes("greater than")) return "The Grid Size must be greater than or equal to 8.";
+            if(error.includes("less than")) return "The Grid Size must be less than or equal to 75."
             return error.includes('value `""`') ? "The 'Grid Size' field is required" : "The 'Grid Size' field must be a number.";
         },
         randomize() {
