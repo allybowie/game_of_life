@@ -11,7 +11,7 @@
       <div :class="'popupInnerContainer'">
         <div :class="'closeButton'" @click="toggleInfoPopup()"></div>
         <div
-          v-for="section, index in data.info"
+          v-for="section, index in $t('info')"
           :key="`info-section-${index}`">
           <h2 v-if="section.header">{{ section.header }}</h2>
           <div v-if="section.content || section.listItems">
@@ -28,7 +28,7 @@
 
 <script>
 import Grid from './components/Grid/Grid.vue';
-import data from "./data/en.json";
+// import data from "./data/en.json";
 
 export default {
   name: 'App',
@@ -37,8 +37,8 @@ export default {
   },
   data() {
     return {
-      infoPopupOpen: false,
-      data
+      infoPopupOpen: false
+      // data
     }
   },
   methods: {

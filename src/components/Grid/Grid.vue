@@ -81,6 +81,7 @@ export default {
       this.updateGridSize();
       this.randomize();
       setInterval(this.updateEntireGrid, 75);
+      console.log(this.$t('info'))
   },
   methods: {
         generateError(error) {
