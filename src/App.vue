@@ -1,12 +1,18 @@
 <template>
   <div id="app">
     <div :class="'container'">
+      <div :class="['ctaContainer', 'hideOnDesktop']">
+        <p :class="'cta'" @click="toggleAnimationMode()"><strong>{{ $t('cta.animationMode') }}</strong></p>
+      </div>
       <div :class="'ctaContainer'">
         <p :class="'cta'" @click="toggleInfoPopup()"><strong>{{ $t('app.whatIsIt') }}</strong></p>
       </div>
       <h1>{{ $t('app.header') }}</h1>
+      <div :class="['ctaContainer', 'hideOnMobile']">
+        <p :class="'cta'" @click="toggleAnimationMode()"><strong>{{ $t('cta.animationMode') }}</strong></p>
+      </div>
     </div>
-    <grid :forceStop="infoPopupOpen"/>
+    <grid :forceStop="infoPopupOpen" :animationMode="animationMode"/>
     <div v-if="infoPopupOpen" :class="'infoPopupContainer'">
       <div :class="'popupInnerContainer'">
         <div :class="'closeButton'" @click="toggleInfoPopup()"></div>
@@ -36,12 +42,16 @@ export default {
   },
   data() {
     return {
-      infoPopupOpen: false
+      infoPopupOpen: false,
+      animationMode: false
     }
   },
   methods: {
     toggleInfoPopup() {
       this.infoPopupOpen = !this.infoPopupOpen;
+    },
+    toggleAnimationMode() {
+      this.animationMode = !this.animationMode;
     }
   }
 }
@@ -148,16 +158,28 @@ export default {
   }
 }
 
+.hideOnMobile {
+  display: none;
+}
+
 @media (min-width: 1024px) {
+  .hideOnMobile {
+    display: initial;
+  }
+
+  .hideOnDesktop {
+    display: none;
+  }
+
   .container {
     position: relative;
-    display: flex;
+    flex-direction: row;
     justify-content: space-between;
     max-width: 500px;
     margin: 0 auto;
 
     h1 {
-      width: 100%;
+      width: initial;
       margin-bottom: 21px;
     }
   }
@@ -175,11 +197,8 @@ export default {
   }
 
   .ctaContainer {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     height: 100%;
+    margin: auto 0;
   }
 
   .cta {

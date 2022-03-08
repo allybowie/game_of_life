@@ -58,7 +58,8 @@
         "stop": "Stop",
         "random": "Random Grid",
         "resurrect": "Resurrect All",
-        "killAll": "Kill Them All"
+        "killAll": "Kill Them All",
+        "animationMode": "See Loops"
     },
     "errors": {
         "minValue": "The Grid Size must be greater than or equal to {0}.",

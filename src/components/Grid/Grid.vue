@@ -58,15 +58,19 @@ export default {
   name: 'grid-container',
   data() {
     return {
-        gridSize: 50,
+        gridSize: 45,
         defaultGrid: [],
         playing: false,
-        gridSplit: 50,
-        gridSizeRules: yup.number().required().min(8).max(75)
+        gridSplit: 45,
+        gridSizeRules: yup.number().required().min(8).max(45)
     }
   },
   props: {
       forceStop: {
+          type: Boolean,
+          default: false
+      },
+      animationMode: {
           type: Boolean,
           default: false
       }
@@ -95,7 +99,7 @@ export default {
   methods: {
         generateError(error) {
             if(error.includes("greater than")) return this.$t('errors.minValue', ['8']);
-            if(error.includes("less than")) return this.$t('errors.maxValue', ['75']);
+            if(error.includes("less than")) return this.$t('errors.maxValue', ['45']);
             return error.includes('value `""`') ?  this.$t('errors.required') :  this.$t('errors.requiredType');
         },
         randomize(forceStatus = "") {
