@@ -115,27 +115,11 @@ export default {
 
             if(!newGridObject.updated) {
                 this.playing = false;
+                this.$emit('nowPlaying', false);
                 return;
             }
 
             this.defaultGrid = newGrid;
-        },
-        compareGrid(newGrid) {
-            newGrid.forEach((row, index) => {
-                if(!this.compareRow(row, index))
-                    return false;
-            })
-
-            return true;
-        },
-        compareRow(row, rowIndex) {
-            row.forEach((cell, index) => {
-                const originalCell = this.defaultGrid[rowIndex][index];
-                if(cell != originalCell)
-                    return false
-            })
-
-            return true;
         },
         updateGridCell(rowIndex, cellIndex, cellStatus) {
             let newGrid = [...this.defaultGrid];
