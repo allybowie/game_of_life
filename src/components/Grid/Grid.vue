@@ -144,6 +144,7 @@ export default {
         },
         startAnimation() {
             this.playing = !this.playing;
+            this.$emit('nowPlaying', this.playing);
         },
         updateGridSize() {
             const rowAmount = parseInt(this.gridSize);
