@@ -2,16 +2,16 @@
   <div id="app">
     <div :class="'container'">
       <div :class="'ctaContainer'">
-        <p :class="'cta'" @click="toggleInfoPopup()"><strong>What is it?</strong></p>
+        <p :class="'cta'" @click="toggleInfoPopup()"><strong>{{ $t('app.whatIsIt') }}</strong></p>
       </div>
-      <h1>The Game of Life</h1>
+      <h1>{{ $t('app.header') }}</h1>
     </div>
     <grid :forceStop="infoPopupOpen"/>
     <div v-if="infoPopupOpen" :class="'infoPopupContainer'">
       <div :class="'popupInnerContainer'">
         <div :class="'closeButton'" @click="toggleInfoPopup()"></div>
         <div
-          v-for="section, index in data.info"
+          v-for="section, index in $tm('gameOfLifeInfo')"
           :key="`info-section-${index}`">
           <h2 v-if="section.header">{{ section.header }}</h2>
           <div v-if="section.content || section.listItems">
@@ -28,7 +28,6 @@
 
 <script>
 import Grid from './components/Grid/Grid.vue';
-import data from "./data/en.json";
 
 export default {
   name: 'App',
@@ -37,8 +36,7 @@ export default {
   },
   data() {
     return {
-      infoPopupOpen: false,
-      data
+      infoPopupOpen: false
     }
   },
   methods: {

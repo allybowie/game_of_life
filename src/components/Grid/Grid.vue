@@ -18,12 +18,12 @@
             type="text"
             :rules="gridSizeRules"
             v-model="gridSize"
-            placeholder="Please Select..."
+            :placeholder="$t('forms.placeholders.pleaseSelect')"
             v-slot="{ errors }">
             <div :class="'field'">
                 <div>
-                    <label>Grid Size</label>
-                    <input type="text" v-model="gridSize" placeholder="Please Select..."/>
+                    <label>{{ $t('forms.labels.gridSize') }}</label>
+                    <input type="text" v-model="gridSize" :placeholder="$t('forms.placeholders.pleaseSelect')"/>
                 </div>
                 <span :class="'error'" v-if="errors[0]">{{generateError(errors[0])}}</span>
             </div>
@@ -31,21 +31,19 @@
     </Form>
     <div :class="'buttonContainer'">
     <div :class="'button'">
-        <p @click="startAnimation()">{{ playing ? "Stop" : "Start" }}</p>
+        <p @click="startAnimation()">{{ playing ? $t('cta.stop') : $t('cta.start') }}</p>
     </div>
     <div :class="'button'">
-        <p @click="randomize()">Random Grid</p>
+        <p @click="randomize()">{{ $t('cta.random') }}</p>
     </div>
     <div :class="'optionsDescriptionContainer'">
-        <p>The below options update the grid so that every cell has the same value.</p>
-        <p>This allows you to manually and tediously create your own grid layout.</p>
-        <p>There is no point in doing this, but having the options makes the app look like it has more features.</p>
+        <p v-for="item, index in $tm('grid.resurrectAndKillDescription')" :key="`resurrect-and-kill-all-description-item-${index}`">{{ item }}</p>
     </div>
     <div :class="'button'">
-        <p @click="randomize('alive')">Resurrect All</p>
+        <p @click="randomize('alive')">{{ $t('cta.resurrect') }}</p>
     </div>
     <div :class="'button'">
-        <p @click="randomize('dead')">Kill Them All</p>
+        <p @click="randomize('dead')">{{ $t('cta.killAll') }}</p>
     </div>
     </div>
   </div>
@@ -96,9 +94,9 @@ export default {
   },
   methods: {
         generateError(error) {
-            if(error.includes("greater than")) return "The Grid Size must be greater than or equal to 8.";
-            if(error.includes("less than")) return "The Grid Size must be less than or equal to 75."
-            return error.includes('value `""`') ? "The 'Grid Size' field is required" : "The 'Grid Size' field must be a number.";
+            if(error.includes("greater than")) return this.$t('errors.minValue', ['8']);
+            if(error.includes("less than")) return this.$t('errors.maxValue', ['75']);
+            return error.includes('value `""`') ?  this.$t('errors.required') :  this.$t('errors.requiredType');
         },
         randomize(forceStatus = "") {
             this.playing = false;
