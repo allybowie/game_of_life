@@ -6,10 +6,11 @@
       </div>
       <h1>{{ $t('app.header') }}</h1>
     </div>
-    <grid :forceStop="infoPopupOpen"/>
+    <grid :forceStop="infoPopupOpen && currentlyPlaying" @nowPlaying="updatePlaying($event)"/>
     <div v-if="infoPopupOpen" :class="'infoPopupContainer'">
       <div :class="'popupInnerContainer'">
         <div :class="'closeButton'" @click="toggleInfoPopup()"></div>
+        <p v-if="currentlyPlaying" :class="'error'"><span>{{ $t('errors.paused') }}</span></p>
         <div
           v-for="section, index in $tm('gameOfLifeInfo')"
           :key="`info-section-${index}`">
@@ -36,12 +37,16 @@ export default {
   },
   data() {
     return {
-      infoPopupOpen: false
+      infoPopupOpen: false,
+      currentlyPlaying: false
     }
   },
   methods: {
     toggleInfoPopup() {
       this.infoPopupOpen = !this.infoPopupOpen;
+    },
+    updatePlaying(event) {
+      this.currentlyPlaying = event;
     }
   }
 }
@@ -65,6 +70,19 @@ export default {
   height: 100vh;
   width: 100vw;
   background-color: rgba(0, 0, 0, 0.7);
+}
+
+.error {
+  margin: 20px auto 10px;
+  font-size: 13px;
+  color: red;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+
+  &span {
+    margin: 0 auto;
+  }
 }
 
 .popupInnerContainer {
@@ -163,6 +181,7 @@ export default {
   }
 
   .infoPopupContainer {
+    position: fixed;
     display: flex;
     justify-content: center;
   }
