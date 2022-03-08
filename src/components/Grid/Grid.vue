@@ -23,7 +23,7 @@
             <div :class="'field'">
                 <div>
                     <label>{{ $t('forms.labels.gridSize') }}</label>
-                    <input type="text" v-model="gridSize" v-bind="gridsize" :placeholder="$t('forms.placeholders.pleaseSelect')"/>
+                    <input type="text" v-model="gridSize" :placeholder="$t('forms.placeholders.pleaseSelect')"/>
                 </div>
                 <span :class="'error'" v-if="errors[0]">{{generateError(errors[0])}}</span>
             </div>
@@ -78,7 +78,19 @@ export default {
   mounted() {
       this.updateGridSize();
       this.randomize();
-      setInterval(this.updateEntireGrid, 75);
+  },
+  watch: {
+      playing: function(value) {
+        if(value) {
+            this.t = setInterval(this.updateEntireGrid, 75);
+        } else {
+            clearInterval(this.t);
+        }
+      },
+      forceStop: function(value) {
+          this.playing = !value;
+          return;
+      }
   },
   methods: {
         generateError(error) {
@@ -97,9 +109,6 @@ export default {
             this.defaultGrid = newGridLayout;
         },
         updateEntireGrid() {
-            if(!this.playing || this.forceStop)
-                return;
-
             const newGridObject = updateGrid([...this.defaultGrid]);
 
             let newGrid = newGridObject.grid;
