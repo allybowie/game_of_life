@@ -151,7 +151,7 @@ export default {
   display: inline-block;
   cursor: pointer;
   border-bottom: 2px solid white;
-  margin: 0 0 20px;
+  margin: 0;
 
   &:hover {
     border-color: #2c3e50;
@@ -160,6 +160,10 @@ export default {
 
 .hideOnMobile {
   display: none;
+}
+
+.ctaContainer {
+    margin: 0 0 10px;
 }
 
 @media (min-width: 1024px) {
