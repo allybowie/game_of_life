@@ -1,5 +1,9 @@
 {
-    "info": [
+    "app": {
+        "header": "The Game of Life",
+        "whatIsIt": "What is it?"
+    },
+    "gameOfLifeInfo": [
         {
             "header": "Conway's Game of Life",
             "content": [
@@ -33,5 +37,33 @@
                 "Click 'Start' to watch the evolution of your grid and see where it ends up!"
             ]
         }
-    ]
+    ],
+    "forms": {
+        "labels": {
+            "gridSize": "Grid Size"
+        },
+        "placeholders": {
+            "pleaseSelect": "Please Select..."
+        }
+    },
+    "grid": {
+        "resurrectAndKillDescription": [
+            "The below options update the grid so that every cell has the same value.",
+            "This allows you to manually and tediously create your own grid layout.",
+            "There is no point in doing this, but having the options makes the app look like it has more features."
+        ]
+    },
+    "cta": {
+        "start": "Start",
+        "stop": "Stop",
+        "random": "Random Grid",
+        "resurrect": "Resurrect All",
+        "killAll": "Kill Them All"
+    },
+    "errors": {
+        "minValue": "The Grid Size must be greater than or equal to {0}.",
+        "maxValue": "The Grid Size must be less than or equal to {0}.",
+        "required": "The 'Grid Size' field is required",
+        "requiredType": "The 'Grid Size' field must be a number."
+    }
 }
