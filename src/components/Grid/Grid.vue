@@ -8,11 +8,14 @@
         <div
             v-for="cell, cellIndex in row"
             :key="`row-${rowIndex}-cell-${cellIndex}`"
-            @click="updateGridCell(rowIndex, cellIndex, cell)"
-            :style="cellStyle()"
-            :class="{cell: true, alive: cell === 'alive'}"></div>
+            @mousedown="updateGridCell(rowIndex, cellIndex, cell)"
+            @mouseenter="updateCellWithDrag(rowIndex, cellIndex, cell)"
+            @mouseup="removeDrag()"
+            :style="cellStyle(cell)"
+            :track-by="cellIndex"
+            :class="{cell: true, alive: cell === 'alive' && !animationMode}"></div>
     </div>
-    <Form :class="'form'" @submit="updateGridSize()">
+    <Form :class="'form'" @submit="updateGridSize()" v-if="!animationMode">
         <Field
             name="gridsize"
             type="text"
@@ -34,6 +37,10 @@
         <p @click="startAnimation()">{{ playing ? $t('cta.stop') : $t('cta.start') }}</p>
     </div>
     <div :class="'button'">
+        <p @click="logGrid()">Log Grid</p>
+    </div>
+    <template v-if="!animationMode">
+    <div :class="'button'">
         <p @click="randomize()">{{ $t('cta.random') }}</p>
     </div>
     <div :class="'optionsDescriptionContainer'">
@@ -45,6 +52,24 @@
     <div :class="'button'">
         <p @click="randomize('dead')">{{ $t('cta.killAll') }}</p>
     </div>
+    </template>
+    <template v-else>
+        <p><strong>Pick a color</strong></p>
+        <div>
+            <p>Selected Color</p>
+        </div>
+        <div :style="{'background-color': selectedColour}">
+            <p>{{ selectedColour }}</p>
+        </div>
+        <p><strong>Available Colors</strong></p>
+        <div
+            v-for="color in colorOptions"
+            :key="`color-option-${color}`"
+            :style="{'background-color': color, 'cursor': 'pointer'}"
+            @click="updateColour(color)">
+            <p>{{ color }}</p>
+        </div>
+    </template>
     </div>
   </div>
 </template>
@@ -53,6 +78,7 @@
 import { Field, Form } from 'vee-validate';
 import * as yup from 'yup';
 import { updateGrid } from "../../utils/utils.js";
+import loops from "../../data/animations/walks.json";
 
 export default {
   name: 'grid-container',
@@ -62,7 +88,23 @@ export default {
         defaultGrid: [],
         playing: false,
         gridSplit: 45,
-        gridSizeRules: yup.number().required().min(8).max(45)
+        gridSizeRules: yup.number().required().min(8).max(45),
+        defaultLoop: 'sonic',
+        colorOptions: [
+            '#b06840',
+            '#f8b188',
+            '#6768f7',
+            '#1f45d0',
+            '#202088',
+            '#f8f8f8',
+            '#d0d4f8',
+            '#b0b0d0',
+            '#686789',
+            '#f80100',
+            '#900000'
+        ],
+        selectedColour: '#f8f8f8',
+        drag: false
     }
   },
   props: {
@@ -94,9 +136,32 @@ export default {
       forceStop: function(value) {
           this.playing = !value;
           return;
+      },
+      animationMode: function(value) {
+          if(value) {
+              this.defaultGrid = loops[this.defaultLoop][0];
+              this.gridSize = loops[this.defaultLoop][0].length;
+              this.gridSplit = loops[this.defaultLoop][0][0].length;
+          }
       }
   },
   methods: {
+        updateCellWithDrag(rowIndex, cellIndex, cell) {
+            if(!this.drag)
+                return;
+            
+            this.updateGridCell(rowIndex, cellIndex, cell);
+            return;
+        },
+        removeDrag() {
+            this.drag = false;
+        },
+        logGrid() {
+            console.log("Grid: ", this.defaultGrid);
+        },
+        updateColour(color) {
+            this.selectedColour = color;
+        },
         generateError(error) {
             if(error.includes("greater than")) return this.$t('errors.minValue', ['8']);
             if(error.includes("less than")) return this.$t('errors.maxValue', ['45']);
@@ -142,8 +207,16 @@ export default {
             return true;
         },
         updateGridCell(rowIndex, cellIndex, cellStatus) {
+            if(!this.drag)
+                this.drag = true;
+
             let newGrid = [...this.defaultGrid];
-            newGrid[rowIndex][cellIndex] = cellStatus === "alive" ? "dead" : "alive";
+            if(this.animationMode) {
+                newGrid[rowIndex][cellIndex] = this.selectedColour;
+            } else {
+                newGrid[rowIndex][cellIndex] = cellStatus === "alive" ? "dead" : "alive";
+            }
+
             this.defaultGrid = newGrid;
         },
         startAnimation() {
@@ -157,12 +230,15 @@ export default {
             this.gridSplit = this.gridSize;
             this.randomize();
         },
-        cellStyle() {
+        cellStyle(cell) {
             const width = `calc(100% / ${this.gridSplit})`
-
-            return {
+            let styleObj = {
                 'width': width
             }
+
+            if(this.animationMode) styleObj['background-color'] = cell;
+
+            return styleObj;
         },
         rowStyle() {
             const grid = document.getElementById("gridContainer");
