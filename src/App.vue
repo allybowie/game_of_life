@@ -2,20 +2,41 @@
   <div id="app">
     <div :class="'container'">
       <div :class="['ctaContainer', 'hideOnDesktop']">
-        <p :class="'cta'" @click="toggleAnimationMode()"><strong>{{ $t('cta.animationMode') }}</strong></p>
+        <p :class="'cta'" @click="toggleAnimationMode()"><strong>{{ animationMode ? $t('cta.goToGameOfLife') : $t('cta.animationMode') }}</strong></p>
       </div>
-      <div :class="'ctaContainer'">
+      <div v-if="!animationMode" :class="'ctaContainer'">
         <p :class="'cta'" @click="toggleInfoPopup()"><strong>{{ $t('app.whatIsIt') }}</strong></p>
       </div>
-      <h1>{{ $t('app.header') }}</h1>
+      <h1>{{ animationMode ? $t('app.drawHeader') : $t('app.header') }}</h1>
       <div :class="['ctaContainer', 'hideOnMobile']">
-        <p :class="'cta'" @click="toggleAnimationMode()"><strong>{{ $t('cta.animationMode') }}</strong></p>
+        <p :class="'cta'" @click="toggleAnimationMode()"><strong>{{ animationMode ? $t('cta.goToGameOfLife') : $t('cta.animationMode') }}</strong></p>
       </div>
     </div>
+
+    <div :class="'container'">
+      <div :class="['ctaContainer']">
+        <p :class="'cta'" @click="changeAlignment('left')"><strong>Left</strong></p>
+      </div>
+      <div :class="['ctaContainer']">
+        <p :class="'cta'" @click="changeAlignment('')"><strong>Center</strong></p>
+      </div>
+      <div :class="['ctaContainer']">
+        <p :class="'cta'" @click="changeAlignment('right')"><strong>Right</strong></p>
+      </div>
+    </div>
+    
+    <div :class="{'appContainer': true, 'rightAligned': alignment === 'right', 'leftAligned': alignment === 'left'}">
     <grid
       :forceStop="infoPopupOpen && currentlyPlaying"
+      :alignment="alignment"
       @nowPlaying="updatePlaying($event)"
       :animationMode="animationMode"/>
+
+    <!-- <frames
+      v-if="animationMode"
+      :class="'framesContainer'"/> -->
+    </div>
+    
     <div v-if="infoPopupOpen" :class="'infoPopupContainer'">
       <div :class="'popupInnerContainer'">
         <div :class="'closeButton'" @click="toggleInfoPopup()"></div>
@@ -38,6 +59,7 @@
 
 <script>
 import Grid from './components/Grid/Grid.vue';
+// import Frames from './components/Frames/Frames.vue';
 
 export default {
   name: 'App',
@@ -47,11 +69,15 @@ export default {
   data() {
     return {
       infoPopupOpen: false,
-      animationMode: false,
-      currentlyPlaying: false
+      animationMode: true,
+      currentlyPlaying: false,
+      alignment: ""
     }
   },
   methods: {
+    changeAlignment(alignment) {
+      this.alignment = alignment;
+    },
     toggleInfoPopup() {
       this.infoPopupOpen = !this.infoPopupOpen;
     },
@@ -74,6 +100,28 @@ export default {
   color: #2c3e50;
   margin-top: 30px;
   width: 100%;
+}
+
+.appContainer {
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.rightAligned {
+  margin-right: 0;
+}
+
+.leftAligned {
+  margin-left: 0;
+}
+
+.framesContainer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 33vw;
+  max-width: 200px;
 }
 
 .infoPopupContainer {

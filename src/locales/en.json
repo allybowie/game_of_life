@@ -1,6 +1,7 @@
 {
     "app": {
         "header": "The Game of Life",
+        "drawHeader": "Bored? Let's Draw!",
         "whatIsIt": "What is it?"
     },
     "gameOfLifeInfo": [
@@ -59,7 +60,8 @@
         "random": "Random Grid",
         "resurrect": "Resurrect All",
         "killAll": "Kill Them All",
-        "animationMode": "See Loops"
+        "animationMode": "Draw",
+        "goToGameOfLife": "Game of Life"
     },
     "errors": {
         "minValue": "The Grid Size must be greater than or equal to {0}.",

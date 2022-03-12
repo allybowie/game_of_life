@@ -1,19 +1,21 @@
 <template>
-  <div id="gridContainer" class="grid">
+  <div id="gridContainer" :class="{'grid': true, 'rightAlign': alignment === 'right', 'leftAlign': alignment === 'left'}">
     <div
         v-for="row, rowIndex in defaultGrid"
         :class="'row'"
+        :id="`grid-row-${rowIndex}`"
         :style="rowStyle()"
         :key="`grid-row-${rowIndex}`">
         <div
             v-for="cell, cellIndex in row"
             :key="`row-${rowIndex}-cell-${cellIndex}`"
-            @mousedown="updateGridCell(rowIndex, cellIndex, cell)"
-            @mouseenter="updateCellWithDrag(rowIndex, cellIndex, cell)"
-            @mouseup="removeDrag()"
+            :id="`grid-row-${rowIndex}-cell-${cellIndex}`"
+            @mousedown="this.colorPicker ? updateColour(cell) : updateGridCell(rowIndex, cellIndex, cell)"
+            @mouseenter="this.colorPicker || this.fill ? '' : updateCellWithDrag(rowIndex, cellIndex, cell)"
+            @mouseup="this.colorPicker || this.fill ? '' : removeDrag()"
             :style="cellStyle(cell)"
             :track-by="cellIndex"
-            :class="{cell: true, alive: cell === 'alive' && !animationMode}"></div>
+            :class="{cell: true && !animationMode, alive: cell === 'alive' && !animationMode, blankAnimationCell: cell === '', pickColour: colorPicker}"></div>
     </div>
     <Form :class="'form'" @submit="updateGridSize()" v-if="!animationMode">
         <Field
@@ -33,12 +35,20 @@
         </Field>
     </Form>
     <div :class="'buttonContainer'">
-    <div :class="'button'">
+    <div :class="'button'" v-if="!animationMode">
         <p @click="startAnimation()">{{ playing ? $t('cta.stop') : $t('cta.start') }}</p>
     </div>
-    <div :class="'button'">
-        <p @click="logGrid()">Log Grid</p>
+    <div v-else :class="'keyFeaturesButtonsContainer'">
+        <div :class="'button'">
+            <p @click="toggleColourPicker()">Color Picker</p>
+        </div>
+        <div :class="'button'">
+            <p @click="toggleFill()">Fill</p>
+        </div>
     </div>
+    <!-- <div :class="'button'">
+        <p @click="logGrid()">Log Grid</p>
+    </div> -->
     <template v-if="!animationMode">
     <div :class="'button'">
         <p @click="randomize()">{{ $t('cta.random') }}</p>
@@ -54,6 +64,9 @@
     </div>
     </template>
     <template v-else>
+        <!-- <div :class="'button'">
+            <p @click="addAnimationFrame()">Add Frame To Animation</p>
+        </div> -->
         <p><strong>Pick a color</strong></p>
         <div>
             <p>Selected Color</p>
@@ -62,6 +75,21 @@
             <p>{{ selectedColour }}</p>
         </div>
         <p><strong>Available Colors</strong></p>
+         <div
+            :style="{'cursor': 'pointer'}"
+            @click="toggleEraser()">
+            <p>Eraser</p>
+        </div>
+        <div
+            :style="{'cursor': 'pointer'}"
+            @click="exportImage()">
+            <p>Export</p>
+        </div>
+        <div
+            v-if="imageLink"
+            :style="{'cursor': 'pointer'}">
+            <a :href="imageLink" download>Download</a>
+        </div>
         <div
             v-for="color in colorOptions"
             :key="`color-option-${color}`"
@@ -69,6 +97,7 @@
             @click="updateColour(color)">
             <p>{{ color }}</p>
         </div>
+        
     </template>
     </div>
   </div>
@@ -77,8 +106,9 @@
 <script>
 import { Field, Form } from 'vee-validate';
 import * as yup from 'yup';
-import { updateGrid } from "../../utils/utils.js";
+import { updateGrid, fillColour } from "../../utils/utils.js";
 import loops from "../../data/animations/walks.json";
+// import { withCtx } from '@vue/runtime-core';
 
 export default {
   name: 'grid-container',
@@ -89,7 +119,7 @@ export default {
         playing: false,
         gridSplit: 45,
         gridSizeRules: yup.number().required().min(8).max(45),
-        defaultLoop: 'sonic',
+        defaultLoop: 'sonicTwo',
         colorOptions: [
             '#b06840',
             '#f8b188',
@@ -101,10 +131,14 @@ export default {
             '#b0b0d0',
             '#686789',
             '#f80100',
-            '#900000'
+            '#900000',
+            '#202420'
         ],
-        selectedColour: '#f8f8f8',
-        drag: false
+        selectedColour: '#202420',
+        drag: false,
+        colorPicker: false,
+        fill: false,
+        imageLink: ''
     }
   },
   props: {
@@ -115,6 +149,10 @@ export default {
       animationMode: {
           type: Boolean,
           default: false
+      },
+      alignment: {
+          type: String,
+          default: ""
       }
   },
   components: {
@@ -122,8 +160,14 @@ export default {
       Form
   },
   mounted() {
-      this.updateGridSize();
-      this.randomize();
+      if(this.animationMode) {
+            this.defaultGrid = loops[this.defaultLoop][0];
+            this.gridSize = loops[this.defaultLoop][0].length;
+            this.gridSplit = loops[this.defaultLoop][0][0].length;
+      } else {
+          this.updateGridSize();
+          this.randomize();
+      }
   },
   watch: {
       playing: function(value) {
@@ -138,14 +182,55 @@ export default {
           return;
       },
       animationMode: function(value) {
+          if(this.playing)
+            this.playing = false;
+
           if(value) {
               this.defaultGrid = loops[this.defaultLoop][0];
               this.gridSize = loops[this.defaultLoop][0].length;
               this.gridSplit = loops[this.defaultLoop][0][0].length;
+          } else {
+            this.updateGridSize();
+            this.randomize();
           }
       }
   },
   methods: {
+        exportImage() {
+            let canv = document.createElement("canvas");
+            canv.setAttribute('width', this.gridSize);
+            canv.setAttribute('height', this.gridSize);
+
+            const ctx = canv.getContext('2d')
+
+            this.defaultGrid.forEach((row, rowIndex )=> {
+                row.forEach((cell, cellIndex) => {
+                    ctx.fillStyle = cell || "#ffffff";
+                    ctx.fillRect(cellIndex, rowIndex, 1, 1)
+                })
+            });
+
+            this.imageLink = ctx.canvas.toDataURL("img/png")
+        },
+        toggleEraser() {
+            this.eraser = true;
+        },
+        toggleFill() {
+            this.eraser = false;
+            this.colorPicker = false;
+            this.fill = true;
+        },
+        toggleColourPicker() {
+            this.eraser = false;
+            this.fill = false;
+            this.colorPicker = !this.colorPicker;
+        },
+        addAnimationFrame() {
+            if(!this.$store.state.animationLoops.length) {
+                this.$store.commit('SET_ANIMATION_LOOP', [[this.defaultGrid]]);
+                return;
+            }
+        },
         updateCellWithDrag(rowIndex, cellIndex, cell) {
             if(!this.drag)
                 return;
@@ -160,7 +245,12 @@ export default {
             console.log("Grid: ", this.defaultGrid);
         },
         updateColour(color) {
+            if(!color)
+                return;
+
             this.selectedColour = color;
+            this.toggleColourPicker();
+            return;
         },
         generateError(error) {
             if(error.includes("greater than")) return this.$t('errors.minValue', ['8']);
@@ -207,12 +297,20 @@ export default {
             return true;
         },
         updateGridCell(rowIndex, cellIndex, cellStatus) {
+            let newGrid = [...this.defaultGrid];
+            if(this.fill) {
+                newGrid = fillColour([...this.defaultGrid], rowIndex, rowIndex, cellIndex, this.selectedColour, true, false, [], [...this.defaultGrid][rowIndex], [...this.defaultGrid][rowIndex][cellIndex]);
+                this.defaultGrid = newGrid;
+                this.fill = false;
+                return;
+            }
+
             if(!this.drag)
                 this.drag = true;
 
-            let newGrid = [...this.defaultGrid];
+            // let newGrid = [...this.defaultGrid];
             if(this.animationMode) {
-                newGrid[rowIndex][cellIndex] = this.selectedColour;
+                newGrid[rowIndex][cellIndex] = this.eraser ? '' : this.selectedColour;
             } else {
                 newGrid[rowIndex][cellIndex] = cellStatus === "alive" ? "dead" : "alive";
             }
@@ -312,6 +410,11 @@ export default {
     background-color: black;
 }
 
+.blankAnimationCell {
+    box-sizing: border-box;
+    border: 0.5px solid grey;
+}
+
 .alive {
     background-color: grey;
 }
@@ -341,10 +444,31 @@ export default {
     }
 }
 
+.keyFeaturesButtonsContainer {
+    display: flex;
+    justify-content: space-between;
+}
+
 @media (min-width: 1024px) {
     .grid {
         max-width: 600px;
         max-height: 600px;
     }
+
+    .rightAlign {
+        margin-right: 0;
+    }
+
+    .leftAlign {
+        margin-left: 0;
+    }
+}
+
+.animationCursor {
+
+}
+
+.pickColour {
+    cursor: crosshair;
 }
 </style>

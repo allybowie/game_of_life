@@ -78,6 +78,129 @@ const updateGrid = (grid) => {
     }
 }
 
+const fillRow = (row, cellIndex, clickedColour, newColour, range, log) => {
+    if(log) {
+        console.log("LOGGING")
+    }
+    const rowArray = [...row];
+    let newRowArray = [...row];
+    let rowRange = [];
+    let isUpdated = false;
+
+    let carryOnLeft = true;
+
+    const updateCellsBeforeRange = row[range[0] - 1] === clickedColour && row[range[0]] === clickedColour;
+
+    if(range.length) {
+
+        let newRowRange = [];
+
+        rowArray.forEach((cell, index) => {
+            let previousCell = index - 1;
+            let adjacentCellUpdated = rowArray[previousCell] !== newRowArray[previousCell];
+
+            if((cell === clickedColour && index >= range[0] && index <= range[1]) || (cell === clickedColour && adjacentCellUpdated)) {
+                if(index - 1 >= 0 && rowArray[index - 1] !== clickedColour) {
+                    newRowRange[0] = index;
+                } else if (index === 0) {
+                    newRowRange[0] = 0;
+                } else if (index < rowArray.length && rowArray[index + 1] !== clickedColour) {
+                    newRowRange[1] = index;
+                } else if (!rowArray[index + 1]) {
+                    newRowRange[1] = rowArray.length - 1;
+                }
+                newRowArray[index] = newColour;
+
+                isUpdated = true;
+            }
+
+            rowRange = [...newRowRange];
+        })
+
+        if(updateCellsBeforeRange) {
+            const beforeRangeCells = [...newRowArray].filter((item, index) => index < range[0]).map((item, index) => {
+                return {
+                    colour: item,
+                    index
+                }
+            }).reverse();
+
+            let breakLoop = false;
+
+            beforeRangeCells.forEach(cell => {
+                if(breakLoop)
+                return;
+                
+                if(cell.colour === clickedColour && cell.colour !== newColour) {
+                    newRowArray[cell.index] = newColour;
+                    rowRange[0] = cell.index;
+                } else {
+                    breakLoop = true;
+                }
+            })
+
+        }
+
+    } else {
+
+        for(let i = cellIndex; i >= 0 && carryOnLeft; i--) {
+            if(rowArray[i] === clickedColour) {
+                newRowArray[i] = newColour;
+                isUpdated = true;
+            } else {
+                carryOnLeft = false;
+                rowRange[0] = i;
+            }
+        }
+
+        let carryOnRight = true;
+
+        for(let i = cellIndex + 1; i < rowArray.length && carryOnRight; i++) {
+            if(rowArray[i] == clickedColour) {
+                newRowArray[i] = newColour;
+                isUpdated = true;
+                rowRange[1] = i;
+            } else {
+                carryOnRight = false;
+                rowRange[1] = i;
+            }
+        }
+    }
+
+    return {
+        newRow: newRowArray,
+        newRange: rowRange,
+        updated: isUpdated
+    };
+}
+
+const fillColour = (grid, initialRowIndex, rowIndex, cellIndex, colour, goingUp, firstTimeDown, range, originalRow, clickedColour = null) => {  
+    let newGrid = [...grid];
+    const clickedCellColour = clickedColour !== null ? clickedColour : grid[rowIndex][cellIndex];
+
+    let firstRow = fillRow(newGrid[rowIndex], cellIndex, clickedCellColour, colour, range || [], rowIndex === 37);
+
+    let newRange;
+
+
+    if(firstTimeDown) {
+        newRange = fillRow(originalRow, cellIndex, clickedCellColour, colour, [], true).newRange;
+    }
+
+    newGrid[rowIndex] = firstRow.newRow;
+
+    if(firstRow.updated && rowIndex > 0 && goingUp) {
+        return fillColour([...newGrid], initialRowIndex, rowIndex - 1, cellIndex, colour, goingUp || rowIndex === 0, !goingUp, firstRow.newRange, originalRow, clickedCellColour);
+    } else if ((!firstRow.updated && rowIndex < initialRowIndex && initialRowIndex < grid.length - 1)|| (firstTimeDown && rowIndex < grid.length - 1 && initialRowIndex < grid.length - 1)) {
+        return fillColour([...newGrid], initialRowIndex, initialRowIndex + 1, cellIndex, colour, false, false, newRange || firstRow.newRange, originalRow, clickedCellColour); 
+    } else if(firstRow.updated && rowIndex < grid.length - 1) {
+        return fillColour([...newGrid], initialRowIndex, rowIndex + 1, cellIndex, colour, false, goingUp, firstRow.newRange, originalRow, clickedCellColour); 
+    }
+    
+    return newGrid;
+}
+
 module.exports = {
-    updateGrid
+    updateGrid,
+    fillColour
 }
