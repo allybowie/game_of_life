@@ -1,7 +1,7 @@
 {
     "app": {
         "header": "The Game of Life",
-        "drawHeader": "Bored? Let's Draw!",
+        "drawHeader": "PxL",
         "whatIsIt": "What is it?"
     },
     "gameOfLifeInfo": [
@@ -41,7 +41,8 @@
     ],
     "forms": {
         "labels": {
-            "gridSize": "Grid Size"
+            "gridSize": "Grid Size",
+            "pictureTitle": "Title"
         },
         "placeholders": {
             "pleaseSelect": "Please Select..."
@@ -61,7 +62,17 @@
         "resurrect": "Resurrect All",
         "killAll": "Kill Them All",
         "animationMode": "Draw",
-        "goToGameOfLife": "Game of Life"
+        "goToGameOfLife": "Game of Life",
+        "eraser": "Eraser",
+        "fill": "Fill",
+        "colourPicker": "Colour Picker",
+        "export": "Export",
+        "download": "Download",
+        "addFrame": "Add Frame",
+        "saveFrame": "Save",
+        "clearFrames": "Clear Frames",
+        "clearCanvas": "Clear Canvas",
+        "duplicateFrame": "Duplicate"
     },
     "errors": {
         "minValue": "The Grid Size must be greater than or equal to {0}.",

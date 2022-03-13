@@ -1,40 +1,43 @@
 <template>
   <div id="app">
-    <div :class="'container'">
-      <div :class="['ctaContainer', 'hideOnDesktop']">
+    <div :class="['container', 'center']">
+      <!-- <div :class="['ctaContainer', 'hideOnDesktop']">
         <p :class="'cta'" @click="toggleAnimationMode()"><strong>{{ animationMode ? $t('cta.goToGameOfLife') : $t('cta.animationMode') }}</strong></p>
-      </div>
+      </div> -->
       <div v-if="!animationMode" :class="'ctaContainer'">
         <p :class="'cta'" @click="toggleInfoPopup()"><strong>{{ $t('app.whatIsIt') }}</strong></p>
       </div>
       <h1>{{ animationMode ? $t('app.drawHeader') : $t('app.header') }}</h1>
-      <div :class="['ctaContainer', 'hideOnMobile']">
+      <!-- <div :class="['ctaContainer', 'hideOnMobile']">
         <p :class="'cta'" @click="toggleAnimationMode()"><strong>{{ animationMode ? $t('cta.goToGameOfLife') : $t('cta.animationMode') }}</strong></p>
-      </div>
+      </div> -->
     </div>
 
     <div :class="'container'">
       <div :class="['ctaContainer']">
-        <p :class="'cta'" @click="changeAlignment('left')"><strong>Left</strong></p>
+        <p :class="{'cta': true, 'activeAlignment': alignment === 'left'}" @click="changeAlignment('left')"><strong>Left</strong></p>
       </div>
       <div :class="['ctaContainer']">
-        <p :class="'cta'" @click="changeAlignment('')"><strong>Center</strong></p>
+        <p :class="{'cta': true, 'activeAlignment': !alignment}" @click="changeAlignment('')"><strong>Center</strong></p>
       </div>
       <div :class="['ctaContainer']">
-        <p :class="'cta'" @click="changeAlignment('right')"><strong>Right</strong></p>
+        <p :class="{'cta': true, 'activeAlignment': alignment === 'right'}" @click="changeAlignment('right')"><strong>Right</strong></p>
       </div>
     </div>
     
-    <div :class="{'appContainer': true, 'rightAligned': alignment === 'right', 'leftAligned': alignment === 'left'}">
-    <grid
-      :forceStop="infoPopupOpen && currentlyPlaying"
-      :alignment="alignment"
-      @nowPlaying="updatePlaying($event)"
-      :animationMode="animationMode"/>
+    <div :key="`main-grid-${$store.state.animationLoops.length}`" :class="{'appContainer': true, 'rightAligned': alignment === 'right', 'leftAligned': alignment === 'left'}">
+      <grid
+        :forceStop="infoPopupOpen && currentlyPlaying"
+        :alignment="alignment"
+        @nowPlaying="updatePlaying($event)"
+        :activeFrame="activeFrame"
+        :animationMode="animationMode"/>
 
-    <!-- <frames
-      v-if="animationMode"
-      :class="'framesContainer'"/> -->
+      <frames
+        v-if="animationMode && $store.state.animationLoops.length"
+        :frames="$store.state.animationLoops"
+        @updateActiveFrame="updateActiveFrame($event)"
+        :class="'framesContainer'"/>
     </div>
     
     <div v-if="infoPopupOpen" :class="'infoPopupContainer'">
@@ -59,22 +62,27 @@
 
 <script>
 import Grid from './components/Grid/Grid.vue';
-// import Frames from './components/Frames/Frames.vue';
+import Frames from './components/Frames/Frames.vue';
 
 export default {
   name: 'App',
   components: {
-    Grid
+    Grid,
+    Frames
   },
   data() {
     return {
       infoPopupOpen: false,
       animationMode: true,
       currentlyPlaying: false,
-      alignment: ""
+      alignment: "",
+      activeFrame: 0
     }
   },
   methods: {
+    updateActiveFrame(event) {
+      this.activeFrame = event
+    },
     changeAlignment(alignment) {
       this.alignment = alignment;
     },
@@ -206,7 +214,8 @@ export default {
   position: relative;
   display: flex;
   flex-direction: column-reverse;
-  justify-content: space-between;
+  // justify-content: space-between;
+  justify-content: center;
   max-width: 500px;
   margin: 0 auto;
 
@@ -227,12 +236,17 @@ export default {
   }
 }
 
+.activeAlignment {
+  border-color: #2c3e50;
+}
+
 .hideOnMobile {
   display: none;
 }
 
 .ctaContainer {
     margin: 0 0 10px;
+    min-width: 100px;
 }
 
 @media (min-width: 1024px) {
@@ -255,6 +269,10 @@ export default {
       width: initial;
       margin-bottom: 21px;
     }
+  }
+
+  .center {
+    justify-content: center;
   }
 
   .infoPopupContainer {
